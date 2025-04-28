@@ -2,9 +2,82 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>My First Game</title>
+  <title>Catch the Falling Squares!</title>
+  <style>
+    body { margin: 0; overflow: hidden; }
+    canvas { display: block; background: #eef; }
+  </style>
 </head>
 <body>
-  <h1>Hello World! My Game is coming soon!</h1>
+<canvas id="gameCanvas"></canvas>
+
+<script>
+const canvas = document.getElementById('gameCanvas');
+const ctx = canvas.getContext('2d');
+canvas.width = window.innerWidth;
+canvas.height = window.innerHeight;
+
+let player = { x: canvas.width / 2 - 25, y: canvas.height - 60, width: 50, height: 50, speed: 7 };
+let squares = [];
+let score = 0;
+
+function spawnSquare() {
+  squares.push({
+    x: Math.random() * (canvas.width - 20),
+    y: -20,
+    size: 20,
+    speed: 3 + Math.random() * 5
+  });
+}
+
+function update() {
+  player.x += (keys['ArrowRight'] ? player.speed : 0) - (keys['ArrowLeft'] ? player.speed : 0);
+  player.x = Math.max(0, Math.min(canvas.width - player.width, player.x));
+
+  squares.forEach((sq, i) => {
+    sq.y += sq.speed;
+    if (sq.y > canvas.height) squares.splice(i, 1);
+    if (sq.x < player.x + player.width &&
+        sq.x + sq.size > player.x &&
+        sq.y < player.y + player.height &&
+        sq.y + sq.size > player.y) {
+      score++;
+      squares.splice(i, 1);
+    }
+  });
+}
+
+function draw() {
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+  // Игрок
+  ctx.fillStyle = 'blue';
+  ctx.fillRect(player.x, player.y, player.width, player.height);
+
+  // Квадраты
+  ctx.fillStyle = 'red';
+  squares.forEach(sq => {
+    ctx.fillRect(sq.x, sq.y, sq.size, sq.size);
+  });
+
+  // Счёт
+  ctx.fillStyle = 'black';
+  ctx.font = '24px Arial';
+  ctx.fillText('Score: ' + score, 10, 30);
+}
+
+function gameLoop() {
+  update();
+  draw();
+  requestAnimationFrame(gameLoop);
+}
+
+let keys = {};
+window.addEventListener('keydown', e => keys[e.key] = true);
+window.addEventListener('keyup', e => keys[e.key] = false);
+
+setInterval(spawnSquare, 700);
+gameLoop();
+</script>
 </body>
 </html>
