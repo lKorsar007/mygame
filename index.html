@@ -2,43 +2,42 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>GTA 5 Lite</title>
+  <title>GTA 5 Lite - Fixed</title>
   <style>
     body { margin: 0; overflow: hidden; }
-    canvas { display: block; background: #a3d1ff; }
+    canvas { display: block; background: #87CEEB; }
   </style>
 </head>
 <body>
 <canvas id="gameCanvas"></canvas>
 <script src="https://cdn.jsdelivr.net/npm/three@0.152.2/build/three.min.js"></script>
 <script>
-// Настройки сцены
 const scene = new THREE.Scene();
 const camera = new THREE.PerspectiveCamera(75, window.innerWidth/window.innerHeight, 0.1, 1000);
 const renderer = new THREE.WebGLRenderer({canvas: document.getElementById('gameCanvas')});
 renderer.setSize(window.innerWidth, window.innerHeight);
 
 // Земля
-const groundGeometry = new THREE.PlaneGeometry(500, 500);
+const groundGeometry = new THREE.PlaneGeometry(1000, 1000);
 const groundMaterial = new THREE.MeshBasicMaterial({ color: 0x228B22 });
 const ground = new THREE.Mesh(groundGeometry, groundMaterial);
 ground.rotation.x = -Math.PI / 2;
 scene.add(ground);
 
-// Игрок (кубик)
+// Игрок
 const playerGeometry = new THREE.BoxGeometry(2, 2, 2);
 const playerMaterial = new THREE.MeshBasicMaterial({ color: 0x0000ff });
 const player = new THREE.Mesh(playerGeometry, playerMaterial);
 player.position.y = 1;
 scene.add(player);
 
-// Машины (кубики)
+// Машины
 const cars = [];
 function spawnCar(x, z) {
-  const carGeometry = new THREE.BoxGeometry(3, 1.5, 5);
+  const carGeometry = new THREE.BoxGeometry(4, 2, 6);
   const carMaterial = new THREE.MeshBasicMaterial({ color: 0xff0000 });
   const car = new THREE.Mesh(carGeometry, carMaterial);
-  car.position.set(x, 0.75, z);
+  car.position.set(x, 1, z);
   scene.add(car);
   cars.push(car);
 }
@@ -49,7 +48,6 @@ spawnCar(20, 20);
 camera.position.set(0, 10, 15);
 camera.lookAt(player.position);
 
-// Управление
 const keys = {};
 let inCar = false;
 let currentCar = null;
@@ -61,27 +59,24 @@ function animate() {
   requestAnimationFrame(animate);
 
   if (inCar && currentCar) {
-    // Управление машиной
     if (keys['arrowup']) currentCar.position.z -= 0.5;
     if (keys['arrowdown']) currentCar.position.z += 0.5;
     if (keys['arrowleft']) currentCar.position.x -= 0.5;
     if (keys['arrowright']) currentCar.position.x += 0.5;
-    camera.position.set(currentCar.position.x, currentCar.position.y + 10, currentCar.position.z + 15);
+    camera.position.set(currentCar.position.x, currentCar.position.y + 8, currentCar.position.z + 12);
     camera.lookAt(currentCar.position);
   } else {
-    // Управление игроком
-    if (keys['w']) player.position.z -= 0.2;
-    if (keys['s']) player.position.z += 0.2;
-    if (keys['a']) player.position.x -= 0.2;
-    if (keys['d']) player.position.x += 0.2;
-    camera.position.set(player.position.x, player.position.y + 10, player.position.z + 15);
+    if (keys['w']) player.position.z -= 0.3;
+    if (keys['s']) player.position.z += 0.3;
+    if (keys['a']) player.position.x -= 0.3;
+    if (keys['d']) player.position.x += 0.3;
+    camera.position.set(player.position.x, player.position.y + 8, player.position.z + 12);
     camera.lookAt(player.position);
 
-    // Проверка на посадку в машину
     if (keys['e']) {
       cars.forEach(car => {
         const dist = player.position.distanceTo(car.position);
-        if (dist < 3) {
+        if (dist < 4) {
           inCar = true;
           currentCar = car;
           player.visible = false;
@@ -94,7 +89,6 @@ function animate() {
 }
 animate();
 
-// Масштабирование окна
 window.addEventListener('resize', () => {
   camera.aspect = window.innerWidth / window.innerHeight;
   camera.updateProjectionMatrix();
